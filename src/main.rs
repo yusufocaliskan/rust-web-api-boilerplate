@@ -24,7 +24,8 @@ async fn start_server() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(get_cors_configurations())
-            .service(actix_web::web::scope("/api/v1").configure(routes::init_routes))
+            .service(actix_web::web::scope("/api/v1").configure(routes::v1::init_routes))
+        // .service(actix_web::web::scope("/api/v2").configure(routes::v2::init_routes))
     })
     .bind(&app_url)?
     .run()
