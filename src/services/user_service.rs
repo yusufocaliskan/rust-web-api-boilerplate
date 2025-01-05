@@ -1,0 +1,3 @@
+struct UserService {}
+
+impl UserService {}
