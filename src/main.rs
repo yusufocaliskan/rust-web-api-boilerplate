@@ -1,5 +1,7 @@
 extern crate mongodb;
+use crate::services::ServiceContainer;
 use actix_cors::Cors;
+use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use mongodb::Database;
 use std::env;
@@ -13,6 +15,7 @@ mod services;
 struct AppState {
     app_name: String,
     db: Database,
+    services: ServiceContainer,
 }
 
 #[actix_web::main]
@@ -21,9 +24,11 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().expect("------ .env bar nebu!.------");
     env_logger::init();
 
+    //displayes logs
+    env::set_var("RUST_LOG", "info");
+
     //Db connection
     let db = framework::database::establish_database_connection().await;
-
     let db_connection = match db {
         Ok(connection) => connection,
         Err(e) => {
@@ -35,10 +40,13 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let service_container = ServiceContainer::new(db_connection.clone());
+
     //app states
     let states = web::Data::new(AppState {
         app_name: String::from("App Name"),
         db: db_connection.clone(),
+        services: service_container,
     });
 
     //Start the server
@@ -55,6 +63,7 @@ async fn start_server(states: web::Data<AppState>) -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             //cors settings
+            .wrap(Logger::default())
             .wrap(get_cors_configurations())
             .app_data(states.clone())
             //set routes

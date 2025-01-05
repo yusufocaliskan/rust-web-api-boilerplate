@@ -1,18 +1,18 @@
 use mongodb::Database;
 
 #[derive(Clone)]
-pub struct UserService {
+pub struct LessonService {
     db: Database,
 }
 
-impl UserService {
+impl LessonService {
     pub fn new(db: Database) -> Self {
         Self { db }
     }
 
-    pub async fn find_all_user_service(&self) {
+    pub async fn find_all_lessons(&self) {
         self.db
-            .create_collection("Silva")
+            .create_collection("find_all_lessons")
             .await
             .expect("TODO: panic message");
     }
