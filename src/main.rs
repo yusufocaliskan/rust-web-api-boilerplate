@@ -1,10 +1,10 @@
 extern crate mongodb;
 use crate::configs::Configs;
+use crate::framework::database::{create_mongo_pool, MongoPool};
 use crate::services::ServiceContainer;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
-use actix_web::{web, App, HttpServer};
-use mongodb::Database;
+use actix_web::{middleware, web, App, HttpServer};
 use std::env;
 use std::sync::Arc;
 
@@ -17,9 +17,9 @@ mod services;
 #[derive(Clone)]
 struct AppState {
     app_name: String,
-    db: Database,
     services: Arc<ServiceContainer>,
     configs: Arc<Configs>,
+    db_pool: Arc<MongoPool>,
 }
 
 #[actix_web::main]
@@ -32,30 +32,20 @@ async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "info");
 
     //Configurations
-    let configs_arc = Arc::new(Configs::new());
+    let configs = Arc::new(Configs::new());
 
     //Db connection
-    let db = framework::database::establish_database_connection(&configs_arc).await;
-    let db_connection = match db {
-        Ok(connection) => connection,
-        Err(e) => {
-            eprintln!("Unable to connect to MongoDB: {}", e);
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                e.to_string(),
-            ));
-        }
-    };
+    let db_pool = Arc::new(create_mongo_pool());
 
     // let service_container = ServiceContainer::new(db_connection.clone());
-    let service_container = Arc::new(ServiceContainer::new(db_connection.clone()));
+    let service_container = Arc::new(ServiceContainer::new(db_pool.clone()));
 
     //app states
     let states = web::Data::new(AppState {
         app_name: String::from("App Name"),
-        db: db_connection.clone(),
         services: service_container,
-        configs: configs_arc,
+        configs,
+        db_pool,
     });
 
     //Start the server
@@ -73,10 +63,11 @@ async fn start_server(states: web::Data<AppState>) -> std::io::Result<()> {
         App::new()
             //cors settings
             .wrap(Logger::default())
+            .wrap(middleware::Compress::default())
             .wrap(get_cors_configurations())
             .app_data(states.clone())
             //set routes
-            .service(actix_web::web::scope("/api/v1").configure(routes::v1::init_routes))
+            .service(web::scope("/api/v1").configure(routes::v1::init_routes))
     })
     .bind(&app_url)?
     .run()
