@@ -11,9 +11,6 @@ impl UserService {
     }
 
     pub async fn find_all_user_service(&self) {
-        self.db
-            .create_collection("Silva")
-            .await
-            .expect("TODO: panic message");
+        self.db.create_collection("helloo").await.expect("Panicccc");
     }
 }

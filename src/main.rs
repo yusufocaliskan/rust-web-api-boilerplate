@@ -1,11 +1,14 @@
 extern crate mongodb;
+use crate::configs::Configs;
 use crate::services::ServiceContainer;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use mongodb::Database;
 use std::env;
+use std::sync::Arc;
 
+mod configs;
 mod controllers;
 mod framework;
 mod routes;
@@ -15,7 +18,8 @@ mod services;
 struct AppState {
     app_name: String,
     db: Database,
-    services: ServiceContainer,
+    services: Arc<ServiceContainer>,
+    configs: Arc<Configs>,
 }
 
 #[actix_web::main]
@@ -27,8 +31,11 @@ async fn main() -> std::io::Result<()> {
     //displayes logs
     env::set_var("RUST_LOG", "info");
 
+    //Configurations
+    let configs_arc = Arc::new(Configs::new());
+
     //Db connection
-    let db = framework::database::establish_database_connection().await;
+    let db = framework::database::establish_database_connection(&configs_arc).await;
     let db_connection = match db {
         Ok(connection) => connection,
         Err(e) => {
@@ -40,13 +47,15 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    let service_container = ServiceContainer::new(db_connection.clone());
+    // let service_container = ServiceContainer::new(db_connection.clone());
+    let service_container = Arc::new(ServiceContainer::new(db_connection.clone()));
 
     //app states
     let states = web::Data::new(AppState {
         app_name: String::from("App Name"),
         db: db_connection.clone(),
         services: service_container,
+        configs: configs_arc,
     });
 
     //Start the server
@@ -68,7 +77,6 @@ async fn start_server(states: web::Data<AppState>) -> std::io::Result<()> {
             .app_data(states.clone())
             //set routes
             .service(actix_web::web::scope("/api/v1").configure(routes::v1::init_routes))
-        // .service(actix_web::web::scope("/api/v2").configure(routes::v2::init_routes))
     })
     .bind(&app_url)?
     .run()

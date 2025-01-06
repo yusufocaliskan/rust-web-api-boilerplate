@@ -5,8 +5,14 @@ pub struct UserController {}
 
 impl UserController {
     pub async fn find_all(state: web::Data<AppState>) -> impl Responder {
+        //services.
         state.services.user_service.find_all_user_service().await;
         state.services.lessons_service.find_all_lessons().await;
+
+        //Using tokens.
+        let token = state.configs.get("MONGO_DB_PASSWORD").expect("Error");
+        println!("User Service Token: {}", token);
+
         HttpResponse::Ok().body(format!("Hello, {}", state.app_name))
     }
 
