@@ -12,7 +12,6 @@ impl UserController {
         //Using tokens.
         let token = state.configs.get("MONGO_DB_PASSWORD").expect("Error");
         println!("User Service Token: {}", token);
-
         HttpResponse::Ok().body(format!("Hello, {}", state.app_name))
     }
 
