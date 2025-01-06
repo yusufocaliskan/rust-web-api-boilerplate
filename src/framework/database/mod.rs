@@ -74,7 +74,7 @@ pub fn create_mongo_pool() -> MongoPool {
     };
 
     //Get max oonpne aconnection size from .env
-    Pool::builder().max_open(16).build(manager)
+    Pool::builder().max_open(50).build(manager)
 }
 
 pub async fn get_database(pool: Arc<MongoPool>) -> Database {
