@@ -1,17 +1,19 @@
+use crate::services::ServiceContainer;
 use crate::AppState;
 use actix_web::{web, HttpResponse, Responder};
+use std::sync::Arc;
 
-pub struct UserController {}
+pub struct UserController {
+    services: Arc<ServiceContainer>,
+}
 
 impl UserController {
-    pub async fn find_all(state: web::Data<AppState>) -> impl Responder {
-        //services.
-        state.services.user_service.find_all_user_service().await;
-        state.services.lessons_service.find_all_lessons().await;
+    pub fn new(services: Arc<ServiceContainer>) -> Self {
+        Self { services }
+    }
 
-        //Using tokens.
-        let token = state.configs.get("MONGO_DB_PASSWORD").expect("Error");
-        println!("User Service Token: {}", token);
+    pub async fn find_all(state: web::Data<AppState>) -> impl Responder {
+        // HTTP response'u hemen döndür
         HttpResponse::Ok().body(format!("Hello, {}", state.app_name))
     }
 

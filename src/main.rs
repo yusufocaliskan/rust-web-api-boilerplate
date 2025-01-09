@@ -1,10 +1,11 @@
 extern crate mongodb;
 use crate::configs::Configs;
-use crate::framework::database::{create_mongo_pool, MongoPool};
+use crate::framework::database::DatabaseInstance;
 use crate::services::ServiceContainer;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{middleware, web, App, HttpServer};
+use mongodb::Database;
 use std::env;
 use std::sync::Arc;
 
@@ -19,7 +20,7 @@ struct AppState {
     app_name: String,
     services: Arc<ServiceContainer>,
     configs: Arc<Configs>,
-    db_pool: Arc<MongoPool>,
+    database: Database,
 }
 
 #[actix_web::main]
@@ -34,18 +35,18 @@ async fn main() -> std::io::Result<()> {
     //Configurations
     let configs = Arc::new(Configs::new());
 
-    //Db connection
-    let db_pool = Arc::new(create_mongo_pool());
+    //db connection
+    let database = DatabaseInstance::new().await.get_db();
 
     // let service_container = ServiceContainer::new(db_connection.clone());
-    let service_container = Arc::new(ServiceContainer::new(db_pool.clone()));
+    let service_container = Arc::new(ServiceContainer::new(database.clone()).await);
 
     //app states
     let states = web::Data::new(AppState {
         app_name: String::from("App Name"),
         services: service_container,
         configs,
-        db_pool,
+        database,
     });
 
     //Start the server

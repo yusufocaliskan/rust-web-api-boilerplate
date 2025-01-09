@@ -1,5 +1,4 @@
 use crate::controllers::user_controller::UserController as controller;
-
 use actix_web::web;
 
 pub fn init(cfg: &mut web::ServiceConfig) {

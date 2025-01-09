@@ -1,12 +1,17 @@
-use actix_web::{HttpResponse, Responder};
+use crate::services::ServiceContainer;
+use crate::AppState;
+use actix_web::{web, HttpResponse, Responder};
+use std::sync::Arc;
 
-pub struct LessonController {}
+pub struct LessonController {
+    services: Arc<ServiceContainer>,
+}
 
 impl LessonController {
-    pub async fn find_all() -> impl Responder {
-        HttpResponse::Ok().body("Cawaniko: Silav Lessons")
+    pub fn new(services: Arc<ServiceContainer>) -> Self {
+        Self { services }
     }
-    pub async fn delete_all() -> impl Responder {
-        HttpResponse::Ok().body("Lessons:: Deleted all")
+    pub async fn find_all(state: web::Data<AppState>) -> impl Responder {
+        HttpResponse::Ok().body("Hello:: find-all")
     }
 }

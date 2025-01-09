@@ -1,7 +1,6 @@
-use crate::framework::database::MongoPool;
 use crate::services::lesson_service::LessonService;
 use crate::services::user_service::UserService;
-use std::sync::Arc;
+use mongodb::Database;
 
 pub mod lesson_service;
 pub mod user_service;
@@ -13,10 +12,10 @@ pub struct ServiceContainer {
 }
 
 impl ServiceContainer {
-    pub fn new(db_pool: Arc<MongoPool>) -> Self {
+    pub async fn new(database: Database) -> Self {
         Self {
-            user_service: UserService::new(db_pool.clone()),
-            lessons_service: LessonService::new(db_pool.clone()),
+            user_service: UserService::new(database.clone()).await,
+            lessons_service: LessonService::new(database.clone()).await,
         }
     }
 }
