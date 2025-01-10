@@ -1,19 +1,28 @@
-use crate::services::ServiceContainer;
+use crate::framework::database::IDatabase;
+use crate::modules::AppModules;
+use crate::services::roles_services::IRoleService;
+use crate::services::unit_services::IUnitService;
 use crate::AppState;
 use actix_web::{web, HttpResponse, Responder};
-use std::sync::Arc;
+use shaku_actix::Inject;
 
-pub struct UserController {
-    services: Arc<ServiceContainer>,
-}
+pub struct UserController {}
 
 impl UserController {
-    pub fn new(services: Arc<ServiceContainer>) -> Self {
-        Self { services }
-    }
+    pub async fn add_new_user(state: web::Data<AppState>) {}
 
-    pub async fn find_all(state: web::Data<AppState>) -> impl Responder {
+    pub async fn find_all(
+        state: web::Data<AppState>,
+        // services: web::Data<ServiceContainer>,
+        unit_services: Inject<AppModules, dyn IUnitService>,
+        roles_services: Inject<AppModules, dyn IRoleService>,
+        database: Inject<AppModules, dyn IDatabase>,
+    ) -> impl Responder {
         // HTTP response'u hemen döndür
+        unit_services.find_all();
+        roles_services.roles();
+        // database.get_db().collection("tset")
+
         HttpResponse::Ok().body(format!("Hello, {}", state.app_name))
     }
 
