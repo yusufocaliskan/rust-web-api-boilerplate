@@ -9,10 +9,28 @@ services, MongoDB for database storage, and Shaku for dependency injection.
 * MongoDB: Flexible and scalable NoSQL database integration.
 * Shaku: Lightweight dependency injection for modular and testable code.
 
+# Install MongoDb
+
+```shell 
+    docker compose up
+```
+
+# Start/Watch
+
+```shell 
+    cargo watch -q -c -w src/ -x run
+```
+
 # Testing
 
 Run the following command to test:
 
 ```shell 
-cargo watch -w tests -x "test -- --nocapture"
+    cargo watch -w tests -x "test -- --nocapture"
+```
+
+Http Test
+
+```shell
+    cargo watch -q -c -w tests/ -x "test  -q http_test -- --nocapture"
 ```

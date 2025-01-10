@@ -11,8 +11,10 @@ use std::env;
 use std::sync::Arc;
 
 mod configs;
+mod constants;
 mod controllers;
 mod framework;
+mod models;
 mod modules;
 mod routes;
 mod services;
@@ -38,6 +40,7 @@ async fn main() -> std::io::Result<()> {
     //db connection
     let database = establish_db_connection().await;
 
+    //create modueles
     let modules = Arc::new(
         AppModules::builder()
             .with_component_parameters::<DatabaseInstance>(DatabaseInstanceParameters {
@@ -45,9 +48,7 @@ async fn main() -> std::io::Result<()> {
             })
             .build(),
     );
-    /*.with_component_parameters::<DatabaseImpl>(DatabaseImplParameters {
-        db: database, // Bu alan struct DatabaseImplParameters (otomatik jenerik) ile eşleşir
-    })*/
+
     //app states
     let states = web::Data::new(AppState {
         app_name: String::from("App Name"),

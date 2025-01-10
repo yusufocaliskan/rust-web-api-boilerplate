@@ -16,6 +16,7 @@ impl IUsersServices for UsersService {
     fn find_all(&self) {
         println!("Hello from unit --Users--> Services");
     }
+
     fn lessons(&self) {
         println!("{}", "Users".blue());
     }

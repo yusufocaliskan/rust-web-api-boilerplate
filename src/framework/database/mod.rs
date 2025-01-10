@@ -19,6 +19,7 @@ impl IDatabase for DatabaseInstance {
     }
 }
 
+//use it if you wish
 #[async_trait]
 pub trait IDatabaseProvider {
     async fn database(&self) -> Database;

@@ -8,6 +8,7 @@ description = "the ziwonify backend service for admin operations"
 repository = "https://github.com/ziwonify/admin-backend"
 keywords = ["ziwonify", "rust", "backend", "actix"]
 
+
 [dependencies]
 mongodb = "3.1.1"
 tokio = { version = "1.42.0", features = ["full"] }
@@ -41,3 +42,5 @@ argon2 = "0.5.3"
 async-trait = "0.1.85"
 tower = "0.5.2"
 tower-http = "0.6.2"
+httpc-test = "0.1.10"
+anyhow = "1.0.95"
