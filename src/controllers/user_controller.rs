@@ -1,10 +1,11 @@
 use crate::framework::database::{IDatabase, IDatabaseProvider};
-use crate::framework::shared::responser::response_generator::ResponseGenerator;
+use crate::framework::shared::responser::response_generator::SnarkyResponder;
 use crate::models::user_model::UserModel;
 use crate::modules::AppModules;
 use crate::services::roles_services::IRoleService;
 use crate::services::unit_services::IUnitService;
 use crate::AppState;
+use actix_web::http::StatusCode;
 use actix_web::web::{Html, Json};
 use actix_web::{web, HttpResponse, Responder};
 use shaku_actix::{Inject, InjectProvided};
@@ -14,10 +15,16 @@ pub struct UserController {}
 impl UserController {
     pub async fn create_user(Json(body): Json<UserModel>) -> impl Responder {
         println!("body: {:?}", body);
-        // Html::new(format!("{}", body.user_id))
+        if body.email == "silav@bar.com" {
+            return SnarkyResponder::success()
+                .payload(body)
+                .code(StatusCode::CREATED)
+                .build();
+        }
 
-        ResponseGenerator::success("Olmadi bea".to_string(), body, 30)
-        // HttpResponse::Ok().json(body)
+        SnarkyResponder::error()
+            .code(StatusCode::INTERNAL_SERVER_ERROR)
+            .build()
     }
     pub async fn find_all(
         state: web::Data<AppState>,
