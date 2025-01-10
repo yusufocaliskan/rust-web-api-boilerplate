@@ -1,5 +1,4 @@
-use actix_web::http::StatusCode;
-use actix_web::HttpResponse;
+use actix_web::{http::StatusCode, HttpResponse};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -34,11 +33,11 @@ impl SnarkyResponder<()> {
 
 impl<T: Serialize> SnarkyResponder<T> {
     pub fn build(mut self) -> HttpResponse {
-        let code = StatusCode::from_u16(self.code).unwrap();
+        let code = StatusCode::from_u16(self.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
 
         if self.message.is_none() {
             let message = code.canonical_reason().unwrap_or("Unknown error");
-            self.message = Option::from(message.to_string());
+            self.message = Some(message.to_string());
         }
 
         HttpResponse::build(code).json(self)

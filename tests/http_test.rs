@@ -7,8 +7,8 @@ async fn http_test() -> anyhow::Result<()> {
 
     let body = json!({
         "email": "no@bar.com",
-
         "first_name": "foo foo",
+
         "password": "test-password",
         "user_id":2121
 
