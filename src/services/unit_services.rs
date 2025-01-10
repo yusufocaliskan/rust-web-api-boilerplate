@@ -12,13 +12,12 @@ pub trait IUnitService: Interface {
 #[shaku(interface=IUnitService)]
 pub struct UnitService {
     #[shaku(inject)]
-    pub database: Arc<dyn IDatabase>,
+    pub db: Arc<dyn IDatabase>,
 }
 
 impl IUnitService for UnitService {
     fn find_all(&self) {
-        self.database.test_db();
-        self.database.get_db();
+        self.db.instance();
         println!("Hello from User service");
     }
 }

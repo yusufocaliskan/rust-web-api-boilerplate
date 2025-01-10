@@ -1,12 +1,10 @@
 use async_trait::async_trait;
 use mongodb::{options::ClientOptions, Client, Database};
-use shaku::{Component, Interface};
+use shaku::{Component, Interface, Provider};
 use std::env;
-
 #[async_trait]
 pub trait IDatabase: Interface {
-    fn test_db(&self);
-    fn get_db(&self) -> &Database;
+    fn instance(&self) -> &Database;
 }
 
 #[derive(Component)]
@@ -16,12 +14,23 @@ pub struct DatabaseInstance {
 }
 
 impl IDatabase for DatabaseInstance {
-    fn test_db(&self) {
-        println!("Hellloo from Test database");
-    }
-
-    fn get_db(&self) -> &Database {
+    fn instance(&self) -> &Database {
         &self.database
+    }
+}
+
+#[async_trait]
+pub trait IDatabaseProvider {
+    async fn database(&self) -> Database;
+}
+#[derive(Provider)]
+#[shaku(interface = IDatabaseProvider)]
+pub struct DatabaseProvider {}
+
+#[async_trait]
+impl IDatabaseProvider for DatabaseProvider {
+    async fn database(&self) -> Database {
+        establish_db_connection().await
     }
 }
 

@@ -1,4 +1,5 @@
-use crate::framework::database::DatabaseInstance;
+use crate::framework::database::{DatabaseInstance, DatabaseProvider};
+use crate::repositories::lessons_repository::LessonsRepository;
 use crate::services::lessons_services::LessonsService;
 use crate::services::roles_services::RoleService;
 use crate::services::unit_services::UnitService;
@@ -7,8 +8,18 @@ use shaku::module;
 
 module! {
     pub AppModules {
-        components = [UnitService, RoleService,
-            DatabaseInstance, LessonsService, UsersService],
-        providers = []
+        components = [
+            //services
+            UnitService,
+            RoleService,
+            DatabaseInstance,
+            LessonsService,
+            UsersService,
+
+            //repos
+            LessonsRepository
+
+        ],
+        providers = [DatabaseProvider]
     }
 }
