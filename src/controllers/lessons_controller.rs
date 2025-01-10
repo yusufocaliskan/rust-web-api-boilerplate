@@ -14,7 +14,8 @@ impl LessonController {
         database: Inject<AppModules, dyn IDatabase>,
     ) -> impl Responder {
         // state.services.lessons_service.find_all_lessons()
-        lessons_services.lessons();
+        lessons_services.find_all().await;
+
         // database.get_db().collection("432432")
         HttpResponse::Ok().body("Hello::find-all")
     }

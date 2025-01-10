@@ -14,7 +14,6 @@ mod configs;
 mod controllers;
 mod framework;
 mod modules;
-mod repositories;
 mod routes;
 mod services;
 
