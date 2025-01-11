@@ -6,10 +6,11 @@ async fn user_controller() -> anyhow::Result<()> {
     let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
 
     let body = json!({
-        "email": "silav@bar.com",
+
+        "email": "new-email@bar.com",
+
         "first_name": "foo foo",
         "password": "test-password",
-        "user_id":2121
 
     });
     let resp: Response = client.do_post("/users/create", body).await?;

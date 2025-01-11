@@ -1,4 +1,5 @@
 use crate::framework::database::DatabaseService;
+use crate::repositories::user_repository::UserRepository;
 use crate::services::lessons_services::LessonsService;
 use crate::services::roles_services::RoleService;
 use crate::services::unit_services::UnitService;
@@ -14,6 +15,9 @@ module! {
             DatabaseService,
             LessonsService,
             UsersService,
+
+            //Respositories
+            UserRepository,
         ],
         providers = []
 
