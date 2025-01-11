@@ -24,8 +24,6 @@ pub struct UsersService {
 #[async_trait]
 impl IUsersServices for UsersService {
     async fn create_user(&self, user: UserModel) -> Result<Option<UserModel>, ServiceError> {
-        println!("---> Creating user ---?");
-
         if self
             .user_repository
             .find_by_email(&user.email)

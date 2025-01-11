@@ -31,10 +31,6 @@ impl UserController {
                 .message(&msg)
                 .code(StatusCode::CONFLICT)
                 .build(),
-            Err(ServiceError::Validation(msg)) => SnarkyResponder::error()
-                .message(&msg)
-                .code(StatusCode::BAD_REQUEST)
-                .build(),
             Err(_) => SnarkyResponder::error()
                 .message("Internal server error")
                 .code(StatusCode::INTERNAL_SERVER_ERROR)

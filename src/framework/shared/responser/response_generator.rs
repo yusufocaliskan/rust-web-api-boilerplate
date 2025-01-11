@@ -1,4 +1,5 @@
 use actix_web::{http::StatusCode, HttpResponse};
+use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -9,7 +10,7 @@ pub struct SnarkyResponder<T = ()> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
     pub status: String,
-    // pub timestamp: String,
+    pub date: DateTime<Utc>,
     // pub pagenation: Option<T>,
 }
 
@@ -20,6 +21,7 @@ impl SnarkyResponder<()> {
             code: StatusCode::OK.as_u16(),
             message: None,
             status: "success".to_string(),
+            date: Utc::now(),
         }
     }
 
@@ -29,6 +31,7 @@ impl SnarkyResponder<()> {
             code: StatusCode::BAD_REQUEST.as_u16(),
             message: None,
             status: "error".to_string(),
+            date: Utc::now(),
         }
     }
 }
@@ -51,6 +54,7 @@ impl<T: Serialize> SnarkyResponder<T> {
             code: self.code,
             message: self.message,
             status: self.status,
+            date: self.date,
         }
     }
 
