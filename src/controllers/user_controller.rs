@@ -22,35 +22,24 @@ impl UserController {
     ) -> impl Responder {
         let user = UserModel::new(ObjectId::new(), body.email, body.first_name, body.password);
 
-        let result = user_service.create_user(user).await;
-
-        if let Ok(created_user) = result {
-            return SnarkyResponder::success()
+        match user_service.create_user(user).await {
+            Ok(created_user) => SnarkyResponder::success()
                 .payload(created_user)
                 .code(StatusCode::CREATED)
-                .build();
+                .build(),
+            Err(ServiceError::AlreadyExists(msg)) => SnarkyResponder::error()
+                .message(&msg)
+                .code(StatusCode::CONFLICT)
+                .build(),
+            Err(ServiceError::Validation(msg)) => SnarkyResponder::error()
+                .message(&msg)
+                .code(StatusCode::BAD_REQUEST)
+                .build(),
+            Err(_) => SnarkyResponder::error()
+                .message("Internal server error")
+                .code(StatusCode::INTERNAL_SERVER_ERROR)
+                .build(),
         }
-
-        let (message, status) = if let Err(err) = result {
-            match err {
-                ServiceError::AlreadyExists(msg) => (msg, StatusCode::CONFLICT),
-                ServiceError::Validation(msg) => (msg, StatusCode::BAD_REQUEST),
-                _ => (
-                    "Internal server error".to_string(),
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                ),
-            }
-        } else {
-            (
-                "Unknown error".to_string(),
-                StatusCode::INTERNAL_SERVER_ERROR,
-            )
-        };
-
-        SnarkyResponder::error()
-            .message(&message)
-            .code(status)
-            .build()
     }
     pub async fn get_an_object_id() -> impl Responder {
         let id = ObjectId::new();

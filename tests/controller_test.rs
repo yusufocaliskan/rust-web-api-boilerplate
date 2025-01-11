@@ -7,8 +7,7 @@ async fn user_controller() -> anyhow::Result<()> {
 
     let body = json!({
 
-        "email": "new-email@bar.com",
-
+        "email": "00what-email@bar.com",
         "first_name": "foo foo",
         "password": "test-password",
 
