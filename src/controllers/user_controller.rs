@@ -1,4 +1,4 @@
-use crate::framework::database::{IDatabase, IDatabaseProvider};
+use crate::framework::database::IDatabaseService;
 use crate::framework::shared::responser::response_generator::SnarkyResponder;
 use crate::models::user_model::UserModel;
 use crate::modules::AppModules;
@@ -8,41 +8,36 @@ use crate::AppState;
 use actix_web::http::StatusCode;
 use actix_web::web::{Html, Json};
 use actix_web::{web, HttpResponse, Responder};
-use shaku_actix::{Inject, InjectProvided};
+use shaku_actix::Inject;
 
 pub struct UserController {}
 
 impl UserController {
     pub async fn create_user(Json(body): Json<UserModel>) -> impl Responder {
         println!("body: {:?}", body);
+        let mut result = SnarkyResponder::error()
+            .code(StatusCode::INTERNAL_SERVER_ERROR)
+            .build();
         if body.email == "silav@bar.com" {
-            return SnarkyResponder::success()
+            result = SnarkyResponder::success()
                 .payload(body)
                 .code(StatusCode::CREATED)
                 .build();
         }
 
-        SnarkyResponder::error()
-            .code(StatusCode::INTERNAL_SERVER_ERROR)
-            .build()
+        return result;
     }
     pub async fn find_all(
         state: web::Data<AppState>,
         // services: web::Data<ServiceContainer>,
         unit_services: Inject<AppModules, dyn IUnitService>,
         roles_services: Inject<AppModules, dyn IRoleService>,
-        database: Inject<AppModules, dyn IDatabase>,
-        dbb: InjectProvided<AppModules, dyn IDatabaseProvider>,
+        database: Inject<AppModules, dyn IDatabaseService>,
     ) -> Html {
         // HTTP response'u hemen döndür
         unit_services.find_all();
         roles_services.roles();
 
-        dbb.database()
-            .await
-            .create_collection("poooooooooooooooooooo")
-            .await
-            .expect("TODO: panic message");
         // database.get_db().collection("tset")
 
         Html::new("<p>test</p>")

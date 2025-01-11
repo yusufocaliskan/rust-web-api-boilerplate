@@ -1,4 +1,4 @@
-use crate::framework::database::IDatabase;
+use crate::framework::database::IDatabaseService;
 use async_trait::async_trait;
 use colored::Colorize;
 use shaku::{Component, Interface};
@@ -14,18 +14,13 @@ pub trait ILessonsService: Interface {
 #[shaku(interface=ILessonsService)]
 pub struct LessonsService {
     #[shaku(inject)]
-    database: Arc<dyn IDatabase>,
+    database: Arc<dyn IDatabaseService>,
 }
 
 #[async_trait]
 impl ILessonsService for LessonsService {
     async fn find_all(&self) {
-        let db = self.database.instance();
-
-        db.create_collection("Test")
-            .await
-            .expect("TODO: panic message");
-        println!("Hello from unit --Lessons--> Services");
+        let collection = self.database.get_database().create_collection("test").await;
     }
     fn lessons(&self) {
         println!("{}", "Lessons".blue());

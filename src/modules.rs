@@ -1,4 +1,4 @@
-use crate::framework::database::{DatabaseInstance, DatabaseProvider};
+use crate::framework::database::DatabaseService;
 use crate::services::lessons_services::LessonsService;
 use crate::services::roles_services::RoleService;
 use crate::services::unit_services::UnitService;
@@ -11,10 +11,11 @@ module! {
             //services
             UnitService,
             RoleService,
-            DatabaseInstance,
+            DatabaseService,
             LessonsService,
             UsersService,
         ],
-        providers = [DatabaseProvider]
+        providers = []
+
     }
 }

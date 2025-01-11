@@ -1,50 +1,50 @@
 use async_trait::async_trait;
+use mongodb::error::Error;
 use mongodb::{options::ClientOptions, Client, Database};
-use shaku::{Component, Interface, Provider};
+use shaku::{Component, Interface};
 use std::env;
+
 #[async_trait]
-pub trait IDatabase: Interface {
-    fn instance(&self) -> &Database;
+pub trait IDatabaseService: Interface {
+    async fn new() -> Result<Self, Error>
+    where
+        Self: Sized;
+    fn get_database(&self) -> Database;
+    fn get_client(&self) -> Client;
 }
 
 #[derive(Component)]
-#[shaku(interface = IDatabase)]
-pub struct DatabaseInstance {
+#[shaku(interface = IDatabaseService)]
+pub struct DatabaseService {
     database: Database,
+    client: Client,
 }
 
-impl IDatabase for DatabaseInstance {
-    fn instance(&self) -> &Database {
-        &self.database
+impl DatabaseService {
+    async fn new_internal() -> Result<Self, Error> {
+        let db_url = env::var("MONGO_DB_URL").expect("MONGO_DB_URL env variable not set");
+        let db_name = env::var("MONGO_DB_NAME").expect("MONGO_DB_NAME env variable not set");
+
+        let client_options = ClientOptions::parse(&db_url).await?;
+        let client = Client::with_options(client_options)?;
+        let database = client.database(&db_name);
+
+        println!("MongoDB connection established!");
+        Ok(Self { database, client })
     }
 }
 
-//use it if you wish
 #[async_trait]
-pub trait IDatabaseProvider {
-    async fn database(&self) -> Database;
-}
-#[derive(Provider)]
-#[shaku(interface = IDatabaseProvider)]
-pub struct DatabaseProvider {}
-
-#[async_trait]
-impl IDatabaseProvider for DatabaseProvider {
-    async fn database(&self) -> Database {
-        establish_db_connection().await
+impl IDatabaseService for DatabaseService {
+    async fn new() -> Result<Self, Error> {
+        Self::new_internal().await
     }
-}
 
-pub async fn establish_db_connection() -> Database {
-    let db_url = env::var("MONGO_DB_URL").expect("MONGO_DB_URL env variable not set");
-    let db_name = env::var("MONGO_DB_NAME").expect("MONGO_DB_NAME env variable not set");
+    fn get_database(&self) -> Database {
+        self.database.clone()
+    }
 
-    let client_options = ClientOptions::parse(&db_url)
-        .await
-        .expect("Failed to parse MongoDB connection string");
-
-    let client = Client::with_options(client_options).expect("Failed to create MongoDB client");
-
-    println!("MongoDB connection established!");
-    client.database(&db_name)
+    fn get_client(&self) -> Client {
+        self.client.clone()
+    }
 }

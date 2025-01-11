@@ -9,6 +9,8 @@ pub struct SnarkyResponder<T = ()> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
     pub status: String,
+    // pub timestamp: String,
+    // pub pagenation: Option<T>,
 }
 
 impl SnarkyResponder<()> {

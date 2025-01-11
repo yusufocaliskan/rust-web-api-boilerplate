@@ -1,4 +1,4 @@
-use crate::framework::database::IDatabase;
+use crate::framework::database::IDatabaseService;
 use async_trait::async_trait;
 use shaku::{Component, Interface};
 use std::sync::Arc;
@@ -12,12 +12,11 @@ pub trait IUnitService: Interface {
 #[shaku(interface=IUnitService)]
 pub struct UnitService {
     #[shaku(inject)]
-    pub db: Arc<dyn IDatabase>,
+    pub db: Arc<dyn IDatabaseService>,
 }
 
 impl IUnitService for UnitService {
     fn find_all(&self) {
-        self.db.instance();
         println!("Hello from User service");
     }
 }

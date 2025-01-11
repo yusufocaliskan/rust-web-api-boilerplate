@@ -1,4 +1,4 @@
-use crate::framework::database::IDatabase;
+use crate::framework::database::IDatabaseService;
 use crate::modules::AppModules;
 use crate::services::lessons_services::ILessonsService;
 use crate::AppState;
@@ -11,7 +11,7 @@ impl LessonController {
     pub async fn find_all(
         state: web::Data<AppState>,
         lessons_services: Inject<AppModules, dyn ILessonsService>,
-        database: Inject<AppModules, dyn IDatabase>,
+        database: Inject<AppModules, dyn IDatabaseService>,
     ) -> impl Responder {
         // state.services.lessons_service.find_all_lessons()
         lessons_services.find_all().await;
