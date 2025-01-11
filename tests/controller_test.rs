@@ -3,13 +3,14 @@ use httpc_test::Response;
 use serde_json::json;
 
 #[tokio::test]
+
 async fn user_controller() -> anyhow::Result<()> {
     let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
 
     let body = json!({
-        "email": "@gmail.com",
+        "email": "",
 
-        "first_name": "test",
+        "first_name": "",
 
         "password": "test-password",
 

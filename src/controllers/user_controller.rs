@@ -1,6 +1,6 @@
 use crate::framework::database::IDatabaseService;
 use crate::framework::shared::responser::response_generator::SnarkyResponder;
-use crate::framework::utils::helpers::validate_inputs;
+use crate::framework::utils::helpers::InputValidator;
 use crate::models::user_model::{CreateUserDto, UserModel};
 use crate::modules::AppModules;
 use crate::services::roles_services::IRoleService;
@@ -21,7 +21,8 @@ impl UserController {
         user_service: Inject<AppModules, dyn IUsersServices>,
     ) -> impl Responder {
         //check validations
-        if let Some(e) = validate_inputs(&body) {
+
+        if let Some(e) = InputValidator::validate(&body) {
             return SnarkyResponder::error()
                 .message(e.to_string())
                 .code(StatusCode::CREATED)

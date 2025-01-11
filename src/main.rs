@@ -13,6 +13,7 @@ mod configs;
 mod constants;
 mod controllers;
 mod framework;
+mod middlewares;
 mod models;
 mod modules;
 mod repositories;
@@ -86,6 +87,7 @@ async fn main() -> std::io::Result<()> {
                     .supports_credentials()
                     .max_age(3600),
             )
+            .wrap(middleware::DefaultHeaders::new().add(("X-Version", "0.0.1")))
             //set routes
             .service(web::scope("/api/v1").configure(routes::v1::init_routes))
     })
