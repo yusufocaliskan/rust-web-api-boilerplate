@@ -1,6 +1,6 @@
-use crate::constants::services::service_errors::ServiceError;
 use crate::framework::database::IDatabaseService;
 use crate::framework::shared::responser::response_generator::SnarkyResponder;
+use crate::framework::utils::helpers::validate_inputs;
 use crate::models::user_model::{CreateUserDto, UserModel};
 use crate::modules::AppModules;
 use crate::services::roles_services::IRoleService;
@@ -20,6 +20,14 @@ impl UserController {
         Json(body): Json<CreateUserDto>,
         user_service: Inject<AppModules, dyn IUsersServices>,
     ) -> impl Responder {
+        //check validations
+        if let Some(e) = validate_inputs(&body) {
+            return SnarkyResponder::error()
+                .message(e.to_string())
+                .code(StatusCode::CREATED)
+                .build();
+        }
+
         let user = UserModel::new(ObjectId::new(), body.email, body.first_name, body.password);
 
         match user_service.create_user(user).await {
@@ -27,16 +35,13 @@ impl UserController {
                 .payload(created_user)
                 .code(StatusCode::CREATED)
                 .build(),
-            Err(ServiceError::AlreadyExists(msg)) => SnarkyResponder::error()
-                .message(&msg)
-                .code(StatusCode::CONFLICT)
-                .build(),
-            Err(_) => SnarkyResponder::error()
-                .message("Internal server error")
+            Err(e) => SnarkyResponder::error()
+                .message(e.to_string())
                 .code(StatusCode::INTERNAL_SERVER_ERROR)
                 .build(),
         }
     }
+
     pub async fn get_an_object_id() -> impl Responder {
         let id = ObjectId::new();
         SnarkyResponder::success()

@@ -9,6 +9,7 @@ use shaku::module;
 module! {
     pub AppModules {
         components = [
+
             //services
             UnitService,
             RoleService,

@@ -35,6 +35,8 @@ impl UserModel {
 pub struct CreateUserDto {
     #[validate(email(message = "Email is not valid"))]
     pub email: String,
+
+    #[validate(length(min = 1, message = "First name cannot be empty"))]
     pub first_name: String,
     pub password: String,
 }

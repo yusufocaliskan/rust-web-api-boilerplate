@@ -11,7 +11,6 @@ pub struct SnarkyResponder<T = ()> {
     pub message: Option<String>,
     pub status: String,
     pub date: DateTime<Utc>,
-    // pub pagenation: Option<T>,
 }
 
 impl SnarkyResponder<()> {
@@ -63,8 +62,8 @@ impl<T: Serialize> SnarkyResponder<T> {
         self
     }
 
-    pub fn message(mut self, message: &str) -> Self {
-        self.message = Some(message.to_string());
+    pub fn message<S: Into<String>>(mut self, message: S) -> Self {
+        self.message = Some(message.into());
         self
     }
 }

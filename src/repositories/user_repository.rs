@@ -34,23 +34,28 @@ impl IUserRepository for UserRepository {
             Err(e) => Err(e),
         }
     }
+
     async fn update(&self, user: UserModel) -> Result<Option<UserModel>, Error> {
         todo!()
     }
+
     async fn delete(&self, id: &ObjectId) -> Result<Option<UserModel>, Error> {
         todo!()
     }
+
     async fn find_by_id(&self, id: &ObjectId) -> Result<Option<UserModel>, Error> {
         todo!()
     }
+
     async fn find_by_email(&self, email: &str) -> Result<Option<UserModel>, ServiceError> {
         if email.is_empty() {
             return Err(ServiceError::Validation("Email connot be empty".into()));
         }
+
         let collection = self.database.get_database().collection("users");
         match collection.find_one(doc! {"email": email}).await {
             Ok(user) => Ok(user),
-            Err(e) => Err(ServiceError::ConnotCreate("User Connot be created".into())),
+            Err(e) => Err(ServiceError::Error("User Connot be created".into())),
         }
     }
 

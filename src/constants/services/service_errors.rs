@@ -1,23 +1,30 @@
 use thiserror::Error;
+
 #[derive(Debug, Error)]
 pub enum ServiceError {
-    #[error("Validation error: {0}")]
+    #[error("{0}")]
     Validation(String),
 
-    #[error("Resource already exists: {0}")]
+    #[error("{0}")]
     AlreadyExists(String),
 
-    #[error("Resource not found: {0}")]
+    #[error("{0}")]
     NotFound(String),
 
-    #[error("Database error: {0}")]
+    #[error("{0}")]
     Database(String),
 
-    #[error("Internal server error: {0}")]
+    #[error("{0}")]
     Internal(String),
 
-    #[error("Connot be created: {0}")]
+    #[error("{0}")]
     ConnotCreate(String),
+
+    #[error("{0}")]
+    Error(String),
+
+    #[error("{0}")]
+    Success(String),
 }
 
 impl From<mongodb::error::Error> for ServiceError {
