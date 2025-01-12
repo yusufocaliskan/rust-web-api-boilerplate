@@ -5,13 +5,13 @@ services, MongoDB for database storage, and Shaku for dependency injection.
 
 # Features
 
-✅ MongoDB integration for a robust database layer.
-✅ MVC structure with Dependency Injection-like components (repository, service,
+- ✅ MongoDB integration for a robust database layer.
+- ✅ MVC structure with Dependency Injection-like components (repository, service,
 controller).
-✅ Authentication baked right in for secure app development.
-✅ Fully tested—because quality matters.
+- ✅ Authentication baked right in for secure app development.
+= ✅ Fully tested—because quality matters.
 
-Hit ⭐️if you like it.
+Hit the ⭐️ if you like it.
 
 # Install MongoDb
 
