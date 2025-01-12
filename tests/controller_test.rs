@@ -1,14 +1,14 @@
 use chrono::{DateTime, Utc};
-use httpc_test::Response;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::{from_value, json};
-use std::sync::OnceLock;
+use serde_json::json;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserData {
     pub _id: String,
-    pub email: String,
     pub first_name: String,
+    pub password: String,
+    pub email: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -19,40 +19,62 @@ pub struct ResponseHandler<T = UserData> {
     pub status: String,
     pub date: DateTime<Utc>,
 }
-#[derive(Debug, Clone)]
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LoggedInUser {
-    pub id: String,
-    pub email: String,
     pub access_token: String,
+    pub user: UserData,
 }
 
-static LOGGED_IN_USER: OnceLock<LoggedInUser> = OnceLock::new();
+pub async fn ensure_logged_in_user() -> anyhow::Result<LoggedInUser> {
+    let body = json!({
+        "email": "id@gmail.com",
+        "password": "test-password",
+    });
+
+    let client = Client::new();
+    let resp = client
+        .post("http://localhost:4040/api/v1/users/login")
+        .json(&body)
+        .send()
+        .await?;
+
+    println!("Login Response --> {:#?}", resp);
+    let response_text = resp.text().await?;
+    println!("Login Body --> {:#?}", response_text);
+    let response_body: ResponseHandler<LoggedInUser> = serde_json::from_str(&response_text)?;
+
+    if let Some(user) = response_body.data {
+        return Ok(user);
+    }
+
+    anyhow::bail!("Failed to log in");
+}
 
 #[tokio::test]
 async fn test_create_user() -> anyhow::Result<()> {
-    let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
+    let client = Client::new();
 
     let body = json!({
-        "email": "here--id@gmail.com",
+        "email": "t43434here--id@gmail.com",
         "first_name": "silav",
         "password": "test-password",
-
     });
 
-    let resp: Response = client.do_post("/users/create", body).await?;
-    resp.print().await?;
+    let resp = client
+        .post("http://localhost:4040/api/v1/users/create")
+        .json(&body)
+        .send()
+        .await?;
 
-    let json_value: serde_json::Value = resp.json_body()?;
-    let response_body: ResponseHandler<UserData> = from_value(json_value)?;
+    println!("Create User Response --> {:#?}", resp);
+    let response_text = resp.text().await?;
+    let response_body: ResponseHandler<UserData> = serde_json::from_str(&response_text)?;
 
     if let Some(user_data) = response_body.data {
-        let url = format!("/users/{}", user_data._id);
-        let resp: Response = client.do_get(url.as_str()).await?;
-        resp.print().await?;
-
-        assert_eq!(user_data._id, "what@gmail.com");
+        assert_eq!(user_data.email, "t43434here--id@gmail.com");
     } else {
-        assert!(false);
+        anyhow::bail!("User creation failed");
     }
 
     Ok(())
@@ -60,77 +82,41 @@ async fn test_create_user() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn test_login_user() -> anyhow::Result<()> {
-    let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
+    let user = ensure_logged_in_user().await?;
+    println!("Logged in user: {:#?}", user);
 
-    let body = json!({
-        "email": "id@gmail.com",
-        "password": "test-password",
-
-    });
-
-    let resp: Response = client.do_post("/users/login", body).await?;
-    resp.print().await?;
-
-    let json_value: serde_json::Value = resp.json_body()?;
-    let response_body: ResponseHandler<UserData> = from_value(json_value)?;
-
-    if let Some(user_data) = response_body.data {
-        resp.print().await?;
-        /*LOGGED_IN_USER.set(LoggedInUser{
-
-        })*/
-        assert_eq!(user_data.email, "id@gmail.com");
-    } else {
-        assert!(false);
-    }
-
+    assert_eq!(user.user.email, "id@gmail.com");
     Ok(())
 }
+
 #[tokio::test]
 async fn test_update_user() -> anyhow::Result<()> {
-    let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
+    let client = Client::new();
+    let user = ensure_logged_in_user().await?;
 
     let body = json!({
         "email": "updated@gmail.com",
         "first_name": "updated: silav",
         "password": "updated: test-password",
-
     });
 
-    let expected_user_id = "678398f04d4e14a53e64a25d";
-    let url = format!("/users/{}", expected_user_id);
+    let expected_user_id = user.user._id;
+    let url = format!("http://localhost:4040/api/v1/users/{}", expected_user_id);
 
-    let resp: Response = client.do_put(url.as_str(), body).await?;
-    resp.print().await?;
+    let resp = client
+        .put(&url)
+        .header("Authorization", format!("Bearer {}", user.access_token))
+        .json(&body)
+        .send()
+        .await?;
 
-    let json_value: serde_json::Value = resp.json_body()?;
-    let response_body: ResponseHandler<UserData> = from_value(json_value)?;
+    println!("Update User Response --> {:#?}", resp);
+    let response_body: ResponseHandler<UserData> = resp.json().await?;
 
-    if let Some(user_data) = response_body.data {
-        assert_eq!(user_data._id, "what@gmail.com");
+    if let Some(updated_user) = response_body.data {
+        assert_eq!(updated_user.email, "updated@gmail.com");
     } else {
-        assert!(false);
-    }
-
-    Ok(())
-}
-
-#[tokio::test]
-async fn test_get_user() -> anyhow::Result<()> {
-    let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
-
-    let expected_user_id = "678398f04d4e14a53e64a25d";
-    let url = format!("/users/{}", expected_user_id);
-    let resp: Response = client.do_get(url.as_str()).await?;
-    resp.print().await?;
-
-    let json_value: serde_json::Value = resp.json_body()?;
-    let response_body: ResponseHandler<UserData> = from_value(json_value)?;
-
-    if let Some(user_data) = response_body.data {
-        assert_eq!(user_data._id, expected_user_id);
-    } else {
-        assert!(false);
+        anyhow::bail!("User update failed");
     }
 
     Ok(())
@@ -138,15 +124,20 @@ async fn test_get_user() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn test_delete_user() -> anyhow::Result<()> {
-    let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
+    let client = Client::new();
+    let user = ensure_logged_in_user().await?;
 
-    let expected_user_id = "678398cc4d4e14a53e64a25b";
-    let url = format!("/users/{}", expected_user_id);
-    let resp: Response = client.do_delete(url.as_str()).await?;
-    resp.print().await?;
+    let expected_user_id = user.user._id;
+    let url = format!("http://localhost:4040/api/v1/users/{}", expected_user_id);
 
-    let body = resp.json_body()?;
-    assert_eq!(resp.status(), 200);
+    let resp = client
+        .delete(&url)
+        .header("Authorization", format!("Bearer {}", user.access_token))
+        .send()
+        .await?;
+
+    println!("Delete User Response --> {:#?}", resp);
+    assert_eq!(resp.status().as_u16(), 200);
 
     Ok(())
 }

@@ -49,6 +49,7 @@ impl IAuthService for AuthService {
         let token = encode(&header, &claims, &EncodingKey::from_secret(JWT_SECRET))
             .map_err(|e| ServiceError::Internal(format!("Token generation failed: {}", e)))?;
 
+        println!("Cloned user: {:?}", cloned_user);
         Ok(TokenResponse {
             access_token: token,
             token_type: "Bearer".to_string(),

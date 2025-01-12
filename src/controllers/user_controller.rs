@@ -41,6 +41,7 @@ impl UserController {
         user_service: Inject<AppModules, dyn IUsersServices>,
     ) -> impl Responder {
         let (id) = path.into_inner();
+        println!("ID --> {}", id);
 
         let object_id = match parse_object_id(&id) {
             Ok(object_id) => object_id,
