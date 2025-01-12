@@ -9,7 +9,7 @@ services, MongoDB for database storage, and Shaku for dependency injection.
 - ✅ MVC structure with Dependency Injection-like components (repository, service,
 controller).
 - ✅ Authentication baked right in for secure app development.
-= ✅ Fully tested—because quality matters.
+- ✅ Fully tested—because quality matters.
 
 Hit the ⭐️ if you like it.
 
