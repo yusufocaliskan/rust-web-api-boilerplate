@@ -28,7 +28,7 @@ pub struct LoggedInUser {
 
 pub async fn ensure_logged_in_user() -> anyhow::Result<LoggedInUser> {
     let body = json!({
-        "email": "id@gmail.com",
+        "email": "t43434here--id@gmail.com",
         "password": "test-password",
     });
 
@@ -94,13 +94,15 @@ async fn test_update_user() -> anyhow::Result<()> {
     let client = Client::new();
     let user = ensure_logged_in_user().await?;
 
+    println!("Logged in user: {:#?}", user);
     let body = json!({
-        "email": "updated@gmail.com",
+        "email": "t43434here--id@gmail.com",
         "first_name": "updated: silav",
         "password": "updated: test-password",
     });
 
     let expected_user_id = user.user._id;
+    println!("ID--> Updated User --> {:#?}", expected_user_id);
     let url = format!("http://localhost:4040/api/v1/users/{}", expected_user_id);
 
     let resp = client

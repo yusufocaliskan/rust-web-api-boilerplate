@@ -1,3 +1,4 @@
+use crate::framework::utils::helpers::serialize_oid;
 use bson::oid::ObjectId;
 use serde::Serializer;
 use serde_derive::{Deserialize, Serialize};
@@ -10,13 +11,6 @@ pub struct UserModel {
     pub email: String,
     pub first_name: String,
     pub password: String,
-}
-
-fn serialize_oid<S>(id: &ObjectId, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    serializer.serialize_str(&id.to_hex())
 }
 
 impl UserModel {
