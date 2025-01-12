@@ -5,9 +5,13 @@ services, MongoDB for database storage, and Shaku for dependency injection.
 
 # Features
 
-* Actix Web: High-performance framework for building web APIs.
-* MongoDB: Flexible and scalable NoSQL database integration.
-* Shaku: Lightweight dependency injection for modular and testable code.
+✅ MongoDB integration for a robust database layer.
+✅ MVC structure with Dependency Injection-like components (repository, service,
+controller).
+✅ Authentication baked right in for secure app development.
+✅ Fully tested—because quality matters.
+
+Hit ⭐️if you like it.
 
 # Install MongoDb
 
@@ -32,5 +36,11 @@ Run the following command to test:
 Http Test
 
 ```shell
-    cargo watch -q -c -w tests/ -x "test  -q http_test -- --nocapture"
+    cargo watch -q -c -w tests/ -x "test  -q test_create_user -- --nocapture"
+```
+
+or
+
+```shell
+    cargo test 
 ```

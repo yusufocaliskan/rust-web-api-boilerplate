@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Yusuf Caliskan <yusufocaliskan@gmail.com>"]
 license = "MIT"
-description = "the ziwonify backend service for admin operations"
-repository = "https://github.com/ziwonify/admin-backend"
-keywords = ["ziwonify", "rust", "backend", "actix"]
+description = " backend service for admin operations"
+repository = "https://github.com/yusufocaliskan/rust-web-api-boilerplate.git"
+keywords = ["rust", "backend", "actix"]
 
 
 [dependencies]
