@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use httpc_test::Response;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_value, json};
+use std::sync::OnceLock;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserData {
@@ -18,6 +19,14 @@ pub struct ResponseHandler<T = UserData> {
     pub status: String,
     pub date: DateTime<Utc>,
 }
+#[derive(Debug, Clone)]
+pub struct LoggedInUser {
+    pub id: String,
+    pub email: String,
+    pub access_token: String,
+}
+
+static LOGGED_IN_USER: OnceLock<LoggedInUser> = OnceLock::new();
 
 #[tokio::test]
 async fn test_create_user() -> anyhow::Result<()> {
@@ -42,6 +51,35 @@ async fn test_create_user() -> anyhow::Result<()> {
         resp.print().await?;
 
         assert_eq!(user_data._id, "what@gmail.com");
+    } else {
+        assert!(false);
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_login_user() -> anyhow::Result<()> {
+    let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
+
+    let body = json!({
+        "email": "id@gmail.com",
+        "password": "test-password",
+
+    });
+
+    let resp: Response = client.do_post("/users/login", body).await?;
+    resp.print().await?;
+
+    let json_value: serde_json::Value = resp.json_body()?;
+    let response_body: ResponseHandler<UserData> = from_value(json_value)?;
+
+    if let Some(user_data) = response_body.data {
+        resp.print().await?;
+        /*LOGGED_IN_USER.set(LoggedInUser{
+
+        })*/
+        assert_eq!(user_data.email, "id@gmail.com");
     } else {
         assert!(false);
     }

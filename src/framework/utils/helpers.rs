@@ -1,44 +1,14 @@
-use std::collections::HashMap;
-use validator::Validate;
+use crate::framework::shared::responser::response_generator::SnarkyResponder;
+use actix_web::HttpResponse;
+use bson::oid::ObjectId;
 
-pub struct InputValidator<T: Validate>(T);
-
-impl<T: Validate> InputValidator<T> {
-    pub fn validate(data: &T) -> Option<String> {
-        if let Err(validation_errors) = data.validate() {
-            for (_, field_errors) in validation_errors.field_errors() {
-                if let Some(error) = field_errors.first() {
-                    return Some(error.to_string());
-                }
-            }
-        }
-        None
-    }
-    // Returns all errors grouped by field
-    pub fn validate_all(data: &T) -> Option<HashMap<String, Vec<String>>> {
-        if let Err(validation_errors) = data.validate() {
-            let mut error_map = HashMap::new();
-
-            for (field, errors) in validation_errors.field_errors() {
-                let error_messages: Vec<String> = errors
-                    .iter()
-                    .map(|error| {
-                        error
-                            .message
-                            .as_ref()
-                            .map_or_else(|| "Validation error".to_string(), |msg| msg.to_string())
-                    })
-                    .collect();
-
-                if !error_messages.is_empty() {
-                    error_map.insert(field.to_string(), error_messages);
-                }
-            }
-
-            if !error_map.is_empty() {
-                return Some(error_map);
-            }
-        }
-        None
+use actix_web::http::StatusCode;
+pub fn parse_object_id(id: &str) -> Result<ObjectId, HttpResponse> {
+    match ObjectId::parse_str(id) {
+        Ok(object_id) => Ok(object_id),
+        Err(_) => Err(SnarkyResponder::error()
+            .message("Invalid Id format")
+            .code(StatusCode::BAD_REQUEST)
+            .build()),
     }
 }

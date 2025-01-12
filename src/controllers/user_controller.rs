@@ -1,12 +1,12 @@
+use crate::framework::shared::input_validator::InputValidator;
 use crate::framework::shared::responser::response_generator::SnarkyResponder;
-use crate::framework::utils::helpers::InputValidator;
+use crate::framework::utils::helpers::parse_object_id;
 use crate::models::user_model::{CreateUserDto, UpdateUserDto};
 use crate::modules::AppModules;
 use crate::services::users_services::IUsersServices;
 use actix_web::http::StatusCode;
 use actix_web::web::Json;
 use actix_web::{web, Responder};
-use bson::oid::ObjectId;
 use shaku_actix::Inject;
 
 pub struct UserController {}
@@ -41,14 +41,10 @@ impl UserController {
         user_service: Inject<AppModules, dyn IUsersServices>,
     ) -> impl Responder {
         let (id) = path.into_inner();
-        let object_id = match ObjectId::parse_str(&id) {
-            Ok(id) => id,
-            Err(_) => {
-                return SnarkyResponder::error()
-                    .message("Invalid ID format")
-                    .code(StatusCode::BAD_REQUEST)
-                    .build()
-            }
+
+        let object_id = match parse_object_id(&id) {
+            Ok(object_id) => object_id,
+            Err(err) => return err,
         };
 
         if let Some(e) = InputValidator::validate(&body) {
@@ -76,14 +72,9 @@ impl UserController {
     ) -> impl Responder {
         let (id) = path.into_inner();
 
-        let object_id = match ObjectId::parse_str(&id) {
-            Ok(id) => id,
-            Err(_) => {
-                return SnarkyResponder::error()
-                    .message("Invalid ID format")
-                    .code(StatusCode::BAD_REQUEST)
-                    .build()
-            }
+        let object_id = match parse_object_id(&id) {
+            Ok(object_id) => object_id,
+            Err(err) => return err,
         };
 
         match user_service.delete_user(object_id).await {
@@ -104,16 +95,9 @@ impl UserController {
     ) -> impl Responder {
         let (id) = path.into_inner();
 
-        println!("userId {}", id);
-
-        let object_id = match ObjectId::parse_str(&id) {
-            Ok(id) => id,
-            Err(_) => {
-                return SnarkyResponder::error()
-                    .message("Invalid ID format")
-                    .code(StatusCode::BAD_REQUEST)
-                    .build()
-            }
+        let object_id = match parse_object_id(&id) {
+            Ok(object_id) => object_id,
+            Err(err) => return err,
         };
 
         match user_service.get_user(object_id).await {
