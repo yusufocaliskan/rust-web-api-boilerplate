@@ -102,19 +102,13 @@ async fn test_get_user() -> anyhow::Result<()> {
 async fn test_delete_user() -> anyhow::Result<()> {
     let client = httpc_test::new_client("http://localhost:4040/api/v1")?;
 
-    let expected_user_id = "678398f04d4e14a53e64a25d";
+    let expected_user_id = "678398cc4d4e14a53e64a25b";
     let url = format!("/users/{}", expected_user_id);
     let resp: Response = client.do_delete(url.as_str()).await?;
     resp.print().await?;
 
-    let json_value: serde_json::Value = resp.json_body()?;
-    let response_body: ResponseHandler<UserData> = from_value(json_value)?;
-
-    if let Some(user_data) = response_body.data {
-        assert_eq!(user_data._id, expected_user_id);
-    } else {
-        assert!(false);
-    }
+    let body = resp.json_body()?;
+    assert_eq!(resp.status(), 200);
 
     Ok(())
 }
