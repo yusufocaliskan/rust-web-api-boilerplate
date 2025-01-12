@@ -1,15 +1,11 @@
-use crate::framework::database::IDatabaseService;
 use crate::framework::shared::responser::response_generator::SnarkyResponder;
 use crate::framework::utils::helpers::InputValidator;
-use crate::models::user_model::{CreateUserDto, UserModel};
+use crate::models::user_model::{CreateUserDto, UpdateUserDto};
 use crate::modules::AppModules;
-use crate::services::roles_services::IRoleService;
-use crate::services::unit_services::IUnitService;
 use crate::services::users_services::IUsersServices;
-use crate::AppState;
 use actix_web::http::StatusCode;
-use actix_web::web::{Html, Json};
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::web::Json;
+use actix_web::{web, Responder};
 use bson::oid::ObjectId;
 use shaku_actix::Inject;
 
@@ -20,20 +16,16 @@ impl UserController {
         Json(body): Json<CreateUserDto>,
         user_service: Inject<AppModules, dyn IUsersServices>,
     ) -> impl Responder {
-        //check validations
-
         if let Some(e) = InputValidator::validate(&body) {
             return SnarkyResponder::error()
-                .message(e.to_string())
-                .code(StatusCode::CREATED)
+                .message(e)
+                .code(StatusCode::BAD_REQUEST)
                 .build();
         }
 
-        let user = UserModel::new(ObjectId::new(), body.email, body.first_name, body.password);
-
-        match user_service.create_user(user).await {
-            Ok(created_user) => SnarkyResponder::success()
-                .payload(created_user)
+        match user_service.create_user(body).await {
+            Ok(user) => SnarkyResponder::success()
+                .payload(user)
                 .code(StatusCode::CREATED)
                 .build(),
             Err(e) => SnarkyResponder::error()
@@ -43,29 +35,111 @@ impl UserController {
         }
     }
 
-    pub async fn get_an_object_id() -> impl Responder {
-        let id = ObjectId::new();
-        SnarkyResponder::success()
-            .payload({ id })
-            .code(StatusCode::CREATED)
-            .build()
+    pub async fn update_user(
+        path: web::Path<String>,
+        Json(body): Json<UpdateUserDto>,
+        user_service: Inject<AppModules, dyn IUsersServices>,
+    ) -> impl Responder {
+        let (id) = path.into_inner();
+        let object_id = match ObjectId::parse_str(&id) {
+            Ok(id) => id,
+            Err(_) => {
+                return SnarkyResponder::error()
+                    .message("Invalid ID format")
+                    .code(StatusCode::BAD_REQUEST)
+                    .build()
+            }
+        };
+
+        if let Some(e) = InputValidator::validate(&body) {
+            return SnarkyResponder::error()
+                .message(e)
+                .code(StatusCode::BAD_REQUEST)
+                .build();
+        }
+
+        match user_service.update_user(object_id, body).await {
+            Ok(user) => SnarkyResponder::success()
+                .payload(user)
+                .code(StatusCode::OK)
+                .build(),
+            Err(e) => SnarkyResponder::error()
+                .message(e.to_string())
+                .code(StatusCode::INTERNAL_SERVER_ERROR)
+                .build(),
+        }
     }
-    pub async fn find_all(
-        state: web::Data<AppState>,
 
-        unit_services: Inject<AppModules, dyn IUnitService>,
-        roles_services: Inject<AppModules, dyn IRoleService>,
-        database: Inject<AppModules, dyn IDatabaseService>,
-    ) -> Html {
-        // HTTP response'u hemen döndür
-        unit_services.find_all();
-        roles_services.roles();
+    pub async fn delete_user(
+        path: web::Path<String>,
+        user_service: Inject<AppModules, dyn IUsersServices>,
+    ) -> impl Responder {
+        let (id) = path.into_inner();
 
-        Html::new("<p>test</p>")
+        let object_id = match ObjectId::parse_str(&id) {
+            Ok(id) => id,
+            Err(_) => {
+                return SnarkyResponder::error()
+                    .message("Invalid ID format")
+                    .code(StatusCode::BAD_REQUEST)
+                    .build()
+            }
+        };
+
+        match user_service.delete_user(object_id).await {
+            Ok(_) => SnarkyResponder::success()
+                .message("User deleted successfully")
+                .code(StatusCode::OK)
+                .build(),
+            Err(e) => SnarkyResponder::error()
+                .message(e.to_string())
+                .code(StatusCode::INTERNAL_SERVER_ERROR)
+                .build(),
+        }
     }
 
-    pub async fn delete_by_id(state: web::Data<AppState>) -> impl Responder {
-        // println!("Silav deleted {:#?}", Self::find_by_user_id());
-        HttpResponse::Ok().body("Deleted all")
+    pub async fn get_user(
+        path: web::Path<String>,
+        user_service: Inject<AppModules, dyn IUsersServices>,
+    ) -> impl Responder {
+        let (id) = path.into_inner();
+
+        println!("userId {}", id);
+
+        let object_id = match ObjectId::parse_str(&id) {
+            Ok(id) => id,
+            Err(_) => {
+                return SnarkyResponder::error()
+                    .message("Invalid ID format")
+                    .code(StatusCode::BAD_REQUEST)
+                    .build()
+            }
+        };
+
+        match user_service.get_user(object_id).await {
+            Ok(user) => SnarkyResponder::success()
+                .payload(user)
+                .code(StatusCode::OK)
+                .build(),
+            Err(e) => SnarkyResponder::error()
+                .message(e.to_string())
+                .code(StatusCode::INTERNAL_SERVER_ERROR)
+                .build(),
+        }
+    }
+
+    pub async fn get_all_users(
+        user_service: Inject<AppModules, dyn IUsersServices>,
+    ) -> impl Responder {
+        match user_service.get_all_users().await {
+            Ok(users) => SnarkyResponder::success()
+                .payload(users)
+                .code(StatusCode::OK)
+                .build(),
+            Err(e) => SnarkyResponder::error()
+                .message(e.to_string())
+                .code(StatusCode::INTERNAL_SERVER_ERROR)
+                .build(),
+        }
     }
 }

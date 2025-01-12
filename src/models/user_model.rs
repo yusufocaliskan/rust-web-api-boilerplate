@@ -5,8 +5,7 @@ use validator_derive::Validate;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserModel {
-    #[serde(serialize_with = "serialize_oid")]
-    #[serde(rename = "id")]
+    #[serde(rename = "_id", serialize_with = "serialize_oid")]
     pub id: ObjectId,
     pub email: String,
     pub first_name: String,
@@ -17,8 +16,9 @@ fn serialize_oid<S>(id: &ObjectId, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    serializer.serialize_str(&id.to_string())
+    serializer.serialize_str(&id.to_hex())
 }
+
 impl UserModel {
     pub fn new(id: ObjectId, email: String, first_name: String, password: String) -> Self {
         Self {
@@ -30,13 +30,20 @@ impl UserModel {
     }
 }
 
-//DTO
-#[derive(Debug, Serialize, Deserialize, Validate, Clone)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CreateUserDto {
     #[validate(email(message = "Email is not valid"))]
     pub email: String,
-
     #[validate(length(min = 1, message = "First name cannot be empty"))]
     pub first_name: String,
     pub password: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct UpdateUserDto {
+    #[validate(email(message = "Email is not valid"))]
+    pub email: Option<String>,
+    #[validate(length(min = 1, message = "First name cannot be empty"))]
+    pub first_name: Option<String>,
+    pub password: Option<String>,
 }
