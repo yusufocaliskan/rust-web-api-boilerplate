@@ -5,8 +5,10 @@ use validator_derive::Validate;
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct LoginDto {
     #[validate(email(message = "Invalid email format"))]
+    #[validate(length(max = 255, message = "Email must not exceed 255 characters"))]
     pub email: String,
-    #[validate(length(min = 6, message = "Password must be at least 6 characters"))]
+
+    #[validate(length(min = 6, max = 30, message = "Password must be at least 6 characters"))]
     pub password: String,
 }
 

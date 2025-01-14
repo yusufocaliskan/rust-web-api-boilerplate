@@ -6,6 +6,9 @@ use serde::Serialize;
 pub struct SnarkyResponder<T = ()> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<T>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub errors: Option<T>,
     pub code: u16,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
@@ -17,6 +20,7 @@ impl SnarkyResponder<()> {
     pub fn success() -> Self {
         Self {
             data: None,
+            errors: None,
             code: StatusCode::OK.as_u16(),
             message: None,
             status: "success".to_string(),
@@ -27,6 +31,7 @@ impl SnarkyResponder<()> {
     pub fn error() -> Self {
         Self {
             data: None,
+            errors: None,
             code: StatusCode::BAD_REQUEST.as_u16(),
             message: None,
             status: "error".to_string(),
@@ -50,6 +55,17 @@ impl<T: Serialize> SnarkyResponder<T> {
     pub fn payload<U: Serialize>(self, data: U) -> SnarkyResponder<U> {
         SnarkyResponder {
             data: Some(data),
+            errors: None,
+            code: self.code,
+            message: self.message,
+            status: self.status,
+            date: self.date,
+        }
+    }
+    pub fn error_payload<U: Serialize>(self, data: U) -> SnarkyResponder<U> {
+        SnarkyResponder {
+            data: None,
+            errors: Some(data),
             code: self.code,
             message: self.message,
             status: self.status,

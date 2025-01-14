@@ -1,0 +1,46 @@
+# # Basic formatting
+# max_width = 100
+# hard_tabs = false
+# tab_spaces = 4
+# newline_style = "Unix"
+# indent_style = "Block"
+
+# # Imports
+# imports_indent = "Block"
+# imports_layout = "Mixed"
+# merge_imports = true 
+# group_imports = "StdExternalCrate"
+
+# # Code organization
+# reorder_imports = true
+# reorder_modules = true
+# edition = "2021"
+
+# # Function formatting
+# fn_args_layout = "Tall"
+# where_single_line = true
+# brace_style = "SameLineWhere"
+# empty_item_single_line = true
+# fn_single_line = false
+
+# # Control flow
+# control_brace_style = "AlwaysSameLine"
+# match_arm_blocks = true
+# match_block_trailing_comma = false
+
+# # Comments
+# wrap_comments = true
+# comment_width = 100
+# normalize_comments = true
+
+# # Chains
+# chain_width = 60
+# use_small_heuristics = "Default"
+
+# # Misc
+# binop_separator = "Front"
+# combine_control_expr = true
+# type_punctuation_density = "Wide"
+# space_before_colon = false
+# spaces_around_ranges = false
+# trim_final_newlines = true

@@ -1,6 +1,7 @@
 use crate::controllers::auth_controller::AuthController as auth_controler;
 use crate::controllers::user_controller::UserController as controller;
 use crate::middlewares::auth_middleware::auth_validator;
+
 use actix_web::web;
 use actix_web_httpauth::middleware::HttpAuthentication;
 

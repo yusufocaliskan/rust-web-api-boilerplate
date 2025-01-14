@@ -3,7 +3,7 @@
 A Rust-based web application leveraging Actix Web for fast and scalable web
 services, MongoDB for database storage, and Shaku for dependency injection.
 
-# Features
+## Features
 
 - ✅ MongoDB integration for a robust database layer.
 - ✅ MVC structure with Dependency Injection-like components (repository, service,
@@ -13,23 +13,23 @@ controller).
 
 Hit the ⭐️ if you like it.
 
-# Install MongoDb
+## Install MongoDb
 
-```shell 
+```shell
     docker compose up
 ```
 
-# Start/Watch
+## Start/Watch
 
-```shell 
+```shell
     cargo watch -q -c -w src/ -x run
 ```
 
-# Testing
+## Testing
 
 Run the following command to test:
 
-```shell 
+```shell
     cargo watch -w tests -x "test -- --nocapture"
 ```
 
@@ -42,5 +42,5 @@ Http Test
 or
 
 ```shell
-    cargo test 
+    cargo test
 ```

@@ -1,9 +1,9 @@
-use crate::framework::shared::input_validator::InputValidator;
+use crate::framework::shared::input_validator::validate_inputs;
 use crate::framework::shared::responser::response_generator::SnarkyResponder;
 use crate::models::todo_model::{CreateTodoDto, UpdateTodoDto};
 use crate::modules::AppModules;
 use crate::services::todo_service::ITodoService;
-use actix_web::web::Json;
+use actix_web::web::{Bytes, Json};
 use actix_web::{
     http::StatusCode,
     web::{self},
@@ -16,16 +16,19 @@ pub struct TodoController;
 
 impl TodoController {
     pub async fn create_todo(
-        Json(body): web::Json<CreateTodoDto>,
+        body: Bytes, // Raw body
         todo_service: Inject<AppModules, dyn ITodoService>,
     ) -> impl Responder {
-        if let Some(e) = InputValidator::validate(&body) {
-            return SnarkyResponder::error()
-                .message(e)
-                .code(StatusCode::BAD_REQUEST)
-                .build();
-        }
-        match todo_service.create_todo(body).await {
+        let data: CreateTodoDto = match validate_inputs::<CreateTodoDto>(&body) {
+            Ok(data) => data,
+            Err(errors) => {
+                return SnarkyResponder::error()
+                    .payload(errors)
+                    .code(StatusCode::BAD_REQUEST)
+                    .build();
+            }
+        };
+        match todo_service.create_todo(data).await {
             Ok(todo) => SnarkyResponder::success()
                 .payload(todo)
                 .code(StatusCode::CREATED)
@@ -41,7 +44,7 @@ impl TodoController {
         path: web::Path<String>,
         todo_service: Inject<AppModules, dyn ITodoService>,
     ) -> impl Responder {
-        let (id) = path.into_inner();
+        let id = path.into_inner();
         let object_id = ObjectId::parse_str(&id).unwrap();
         match todo_service.get_todo(object_id).await {
             Ok(todo) => SnarkyResponder::success()
@@ -59,7 +62,7 @@ impl TodoController {
         path: web::Path<String>,
         todo_service: Inject<AppModules, dyn ITodoService>,
     ) -> impl Responder {
-        let (user_id) = path.into_inner();
+        let user_id = path.into_inner();
 
         let object_id = ObjectId::parse_str(user_id).unwrap();
         match todo_service.get_user_todos(object_id).await {
@@ -79,7 +82,7 @@ impl TodoController {
         update_dto: web::Json<UpdateTodoDto>,
         todo_service: Inject<AppModules, dyn ITodoService>,
     ) -> impl Responder {
-        let (id) = path.into_inner();
+        let id = path.into_inner();
         let object_id = ObjectId::parse_str(id).unwrap();
         match todo_service
             .update_todo(object_id, update_dto.into_inner())
@@ -100,7 +103,7 @@ impl TodoController {
         path: web::Path<String>,
         todo_service: Inject<AppModules, dyn ITodoService>,
     ) -> impl Responder {
-        let (id) = path.into_inner();
+        let id = path.into_inner();
         let object_id = ObjectId::parse_str(id).unwrap();
         match todo_service.delete_todo(object_id).await {
             Ok(_) => SnarkyResponder::success()

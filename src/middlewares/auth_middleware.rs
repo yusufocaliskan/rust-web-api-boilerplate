@@ -1,8 +1,9 @@
 use crate::models::auth_model::TokenClaims;
-use actix_web::error::ErrorUnauthorized;
 use actix_web::{dev::ServiceRequest, Error};
+use actix_web::{error::ErrorUnauthorized, web::Bytes};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use jsonwebtoken::{decode, DecodingKey, Validation};
+use reqwest::Body;
 
 pub async fn auth_validator(
     req: ServiceRequest,

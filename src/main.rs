@@ -3,6 +3,7 @@ use crate::configs::Configs;
 use crate::framework::database::{DatabaseService, DatabaseServiceParameters, IDatabaseService};
 use crate::modules::AppModules;
 use actix_cors::Cors;
+use actix_http::header;
 use actix_web::middleware::Logger;
 use actix_web::{middleware, web, App, HttpServer};
 use env_logger::{Builder, Env};
@@ -79,11 +80,7 @@ async fn main() -> std::io::Result<()> {
                 Cors::default()
                     .allow_any_origin()
                     .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
-                    /*.allowed_headers(vec![
-                        header::AUTHORIZATION,
-                        header::ACCEPT,
-                        header::CONTENT_TYPE,
-                    ])*/
+                    .allowed_headers(vec![header::ACCEPT, header::CONTENT_TYPE])
                     .supports_credentials()
                     .max_age(3600),
             )

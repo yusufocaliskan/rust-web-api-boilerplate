@@ -22,7 +22,6 @@ pub struct AuthService {
 }
 
 #[async_trait]
-
 impl IAuthService for AuthService {
     async fn login(&self, login_dto: LoginDto) -> Result<TokenResponse, ServiceError> {
         let user = self

@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -29,10 +30,11 @@ pub struct LoggedInUser {
 pub async fn ensure_logged_in_user() -> anyhow::Result<LoggedInUser> {
     let body = json!({
         "email": "t43434here--id@gmail.com",
-        "password": "test-password",
+        "password": "updated: test-password",
     });
 
     let client = Client::new();
+
     let resp = client
         .post("http://localhost:4040/api/v1/users/login")
         .json(&body)
@@ -40,6 +42,7 @@ pub async fn ensure_logged_in_user() -> anyhow::Result<LoggedInUser> {
         .await?;
 
     println!("Login Response --> {:#?}", resp);
+
     let response_text = resp.text().await?;
     println!("Login Body --> {:#?}", response_text);
     let response_body: ResponseHandler<LoggedInUser> = serde_json::from_str(&response_text)?;

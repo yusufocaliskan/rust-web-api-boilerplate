@@ -63,8 +63,7 @@ impl IUserRepository for UserRepository {
     async fn find_by_id(&self, id: &ObjectId) -> Result<Option<UserModel>, Error> {
         let collection: Collection<UserModel> = self.database.get_database().collection("users");
         let filter = doc! {"_id": id.to_string()};
-        let found = collection.find_one(filter).await;
-        found
+        collection.find_one(filter).await
     }
 
     async fn find_by_email(&self, email: &str) -> Result<Option<UserModel>, ServiceError> {
